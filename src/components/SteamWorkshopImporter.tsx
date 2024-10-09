@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { Mod } from '../db';
+import * as cheerio from 'cheerio';
 
 interface SteamWorkshopImporterProps {
   onImport: (mod: Omit<Mod, 'id'>) => void;
@@ -12,20 +13,56 @@ const SteamWorkshopImporter: React.FC<SteamWorkshopImporterProps> = ({ onImport,
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const scrapeWorkshopData = async (url: string) => {
+    try {
+      const corsProxy = 'https://api.allorigins.win/get?url=';
+      const encodedUrl = encodeURIComponent(url);
+      const response = await axios.get(`${corsProxy}${encodedUrl}`);
+      
+      const html = response.data.contents;
+      const $ = cheerio.load(html);
+
+      const workshopId = url.match(/\?id=(\d+)/)?.[1];
+      if (!workshopId) throw new Error('Invalid workshop URL');
+
+      const title = $('.workshopItemTitle').text().trim();
+      const description = $('.workshopItemDescription').text().trim();
+      const thumbnailUrl = $('.workshopItemPreviewImage').attr('src') || '';
+      const author = $('.workshopItemAuthorName a').text().trim();
+      const lastUpdated = $('.detailsStatRight:contains("Updated")').next().text().trim();
+
+      if (!title) {
+        throw new Error('Could not find mod information');
+      }
+
+      return {
+        name: title,
+        description,
+        steamWorkshopId: workshopId,
+        thumbnailUrl,
+        author,
+        lastUpdated: new Date().toISOString(),
+      };
+    } catch (error) {
+      throw new Error('Failed to fetch workshop data. Make sure the URL is correct and try again.');
+    }
+  };
+
   const handleImport = async () => {
     setIsLoading(true);
     setError('');
 
     try {
-      const response = await axios.post('/api/scrape-workshop', { url });
-      const scrapedMods = response.data;
-      if (scrapedMods.length === 0) {
-        throw new Error('No mods found on the page');
+      // Basic URL validation
+      if (!url.includes('steamcommunity.com/sharedfiles/filedetails/?id=')) {
+        throw new Error('Invalid Steam Workshop URL');
       }
-      onImport(scrapedMods[0]); // Import the first mod if multiple are found
+
+      const modData = await scrapeWorkshopData(url);
+      onImport(modData);
     } catch (err) {
       console.error('Import error:', err);
-      setError(`Failed to import mod: ${err.response?.data?.details || err.message}`);
+      setError(err instanceof Error ? err.message : 'Failed to import mod');
     } finally {
       setIsLoading(false);
     }

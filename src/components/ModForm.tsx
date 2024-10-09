@@ -8,6 +8,14 @@ interface ModFormProps {
   onCancel: () => void;
 }
 
+// Extend the Mod interface to include Steam Workshop fields
+interface ExtendedMod extends Mod {
+  steamWorkshopId?: string;
+  thumbnailUrl?: string;
+  author?: string;
+  lastUpdated?: string;
+}
+
 const categories = ['Gameplay', 'Graphics', 'Audio', 'UI', 'Cheats', 'Steam Workshop', 'Other'];
 
 const ModForm: React.FC<ModFormProps> = ({ mod, onSave, onCancel }) => {
@@ -16,6 +24,9 @@ const ModForm: React.FC<ModFormProps> = ({ mod, onSave, onCancel }) => {
   const [content, setContent] = useState(mod?.content || '');
   const [category, setCategory] = useState(mod?.category || 'Other');
   const [showImporter, setShowImporter] = useState(false);
+  const [steamWorkshopId, setSteamWorkshopId] = useState((mod as ExtendedMod)?.steamWorkshopId || '');
+  const [thumbnailUrl, setThumbnailUrl] = useState((mod as ExtendedMod)?.thumbnailUrl || '');
+  const [author, setAuthor] = useState((mod as ExtendedMod)?.author || '');
 
   useEffect(() => {
     if (mod) {
@@ -23,26 +34,55 @@ const ModForm: React.FC<ModFormProps> = ({ mod, onSave, onCancel }) => {
       setDescription(mod.description);
       setContent(mod.content);
       setCategory(mod.category);
+      
+      // Set Steam Workshop specific fields if they exist
+      const extendedMod = mod as ExtendedMod;
+      if (extendedMod.steamWorkshopId) {
+        setSteamWorkshopId(extendedMod.steamWorkshopId);
+        setThumbnailUrl(extendedMod.thumbnailUrl || '');
+        setAuthor(extendedMod.author || '');
+      }
     }
   }, [mod]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave({
+    const modData: Omit<ExtendedMod, 'id'> = {
       name,
       description,
       content,
       category,
       createdAt: mod?.createdAt || new Date(),
       updatedAt: new Date(),
-    });
+      steamWorkshopId,
+      thumbnailUrl,
+      author,
+    };
+    onSave(modData);
   };
 
-  const handleImport = (importedMod: Omit<Mod, 'id'>) => {
+  const handleImport = (importedMod: Omit<ExtendedMod, 'id'>) => {
     setName(importedMod.name);
     setDescription(importedMod.description);
-    setContent(importedMod.content);
-    setCategory(importedMod.category);
+    // Create a markdown content from the imported data
+    const markdownContent = `
+# ${importedMod.name}
+
+${importedMod.description}
+
+---
+**Steam Workshop ID**: ${importedMod.steamWorkshopId}
+**Author**: ${importedMod.author}
+**Last Updated**: ${new Date(importedMod.lastUpdated || '').toLocaleDateString()}
+
+![Mod Thumbnail](${importedMod.thumbnailUrl})
+    `.trim();
+
+    setContent(markdownContent);
+    setCategory('Steam Workshop');
+    setSteamWorkshopId(importedMod.steamWorkshopId || '');
+    setThumbnailUrl(importedMod.thumbnailUrl || '');
+    setAuthor(importedMod.author || '');
     setShowImporter(false);
   };
 
@@ -98,7 +138,10 @@ const ModForm: React.FC<ModFormProps> = ({ mod, onSave, onCancel }) => {
           </div>
         )}
         {showImporter && (
-          <SteamWorkshopImporter onImport={handleImport} onCancel={() => setShowImporter(false)} />
+          <SteamWorkshopImporter 
+            onImport={handleImport} 
+            onCancel={() => setShowImporter(false)} 
+          />
         )}
       </fieldset>
       <div className="button-row">
