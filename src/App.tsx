@@ -33,6 +33,7 @@ function App() {
     await db.mods.delete(id);
     if (selectedMod && selectedMod.id === id) {
       setSelectedMod(null);
+      setIsEditing(false);
     }
   };
 

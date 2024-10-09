@@ -44,6 +44,9 @@ button {
 .mod-item {
   padding: 4px 8px;
   cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .mod-item:hover {
@@ -54,6 +57,23 @@ button {
 .mod-item.selected {
   background-color: #000080;
   color: white;
+}
+
+.mod-item span {
+  flex-grow: 1;
+}
+
+.delete-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 8px;
+  min-width: auto;
+}
+
+.delete-button:hover {
+  color: #ff0000;
 }
 
 .button-row {

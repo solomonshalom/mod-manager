@@ -1,5 +1,6 @@
 import React from 'react';
 import { Mod } from '../db';
+import { Trash2 } from 'lucide-react';
 
 interface ModListProps {
   mods: Mod[];
@@ -27,9 +28,20 @@ const ModList: React.FC<ModListProps> = ({ mods, selectedMod, onSelect, onEdit, 
             <div
               key={mod.id}
               className={`mod-item ${selectedMod?.id === mod.id ? 'selected' : ''}`}
-              onClick={() => onSelect(mod)}
             >
-              {mod.name}
+              <span onClick={() => onSelect(mod)}>{mod.name}</span>
+              <button
+                className="delete-button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (window.confirm(`Are you sure you want to delete "${mod.name}"?`)) {
+                    onDelete(mod.id!);
+                  }
+                }}
+                title="Delete mod"
+              >
+                <Trash2 size={16} />
+              </button>
             </div>
           ))}
         </div>
