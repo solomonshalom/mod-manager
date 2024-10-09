@@ -1,0 +1,92 @@
+body {
+  font-family: Arial;
+  background-color: #008080;
+  margin: 0;
+  padding: 16px;
+}
+
+.window {
+  margin-bottom: 16px;
+}
+
+.title-bar-controls button {
+  margin-left: 2px;
+}
+
+.window-body {
+  margin: 8px;
+}
+
+fieldset {
+  margin-bottom: 8px;
+}
+
+.field-row {
+  margin-bottom: 8px;
+}
+
+textarea {
+  width: 100%;
+  min-height: 100px;
+}
+
+button {
+  min-width: 70px;
+}
+
+.mod-list {
+  height: 300px;
+  overflow-y: auto;
+  border: 1px solid #dfdfdf;
+  background-color: white;
+}
+
+.mod-item {
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
+.mod-item:hover {
+  background-color: #000080;
+  color: white;
+}
+
+.mod-item.selected {
+  background-color: #000080;
+  color: white;
+}
+
+.button-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.button-row button {
+  margin-left: 8px;
+}
+
+.markdown-content {
+  background-color: white;
+  border: 1px solid #dfdfdf;
+  padding: 8px;
+  height: 300px;
+  overflow-y: auto;
+}
+
+.category-header {
+  background-color: #c0c0c0;
+  padding: 4px 8px;
+  font-weight: bold;
+  border-top: 1px solid #dfdfdf;
+  border-bottom: 1px solid #808080;
+}
+
+.steam-workshop-importer {
+  margin-top: 16px;
+}
+
+.error-message {
+  color: #ff0000;
+  margin-top: 8px;
+}
